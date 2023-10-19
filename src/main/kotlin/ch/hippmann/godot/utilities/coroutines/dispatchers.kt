@@ -1,4 +1,4 @@
-package ch.hippmann.godot.utilities.global.coroutines
+package ch.hippmann.godot.utilities.coroutines
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

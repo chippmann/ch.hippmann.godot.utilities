@@ -1,4 +1,4 @@
-package ch.hippmann.godot.utilities.global.autoload
+package ch.hippmann.godot.utilities.autoload
 
 import ch.hippmann.godot.utilities.data.WeakRefMap
 import godot.Node
