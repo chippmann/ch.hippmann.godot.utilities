@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.10"
+    id("com.utopia-rise.godot-kotlin-jvm") version "0.7.2-4.1.2"
 }
 
 group = "ch.hippmann.godot"
@@ -7,6 +7,12 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
+}
+
+godot {
+    classPrefix.set("Util")
+    projectName.set("utilities")
+    isRegistrationFileGenerationEnabled.set(false)
 }
 
 dependencies {
