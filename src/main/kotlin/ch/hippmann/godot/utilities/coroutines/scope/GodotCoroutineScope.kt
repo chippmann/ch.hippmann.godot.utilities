@@ -25,7 +25,12 @@ class DefaultGodotCoroutineScope: GodotCoroutineScope {
     private val uiContinuationsMutex = Mutex()
     private val uiContinuations: Queue<UiContinuationWithBlock> = LinkedList()
 
-    override val coroutineContext: CoroutineContext = defaultBackgroundDispatcherContext
+    override val coroutineContext: CoroutineContext = defaultDispatcher() + SupervisorJob() + object : CoroutineExceptionHandler {
+        override val key: CoroutineContext.Key<*> = CoroutineExceptionHandler
+        override fun handleException(context: CoroutineContext, exception: Throwable) {
+            throw exception
+        }
+    }
 
     private suspend fun addUiContinuation(continuation: UiContinuation, block: () -> Unit) {
         uiContinuationsMutex.withLock {
@@ -52,15 +57,6 @@ class DefaultGodotCoroutineScope: GodotCoroutineScope {
             runBlocking {
                 addUiContinuation(continuation, block)
             }
-        }
-    }
-}
-
-private val defaultBackgroundDispatcherContext by lazy {
-    defaultDispatcher() + SupervisorJob() + object : CoroutineExceptionHandler {
-        override val key: CoroutineContext.Key<*> = CoroutineExceptionHandler
-        override fun handleException(context: CoroutineContext, exception: Throwable) {
-            throw exception
         }
     }
 }
