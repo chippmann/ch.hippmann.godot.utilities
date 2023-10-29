@@ -6,6 +6,7 @@ import godot.global.GD
 @PublishedApi
 internal val isDebugBuild by lazy { OS.isDebugBuild() }
 
+fun debug(t: Throwable? = null, message: String) = debug(t) { message }
 inline fun debug(t: Throwable? = null, message: () -> String) {
     if (isDebugBuild) {
         log(
@@ -15,16 +16,19 @@ inline fun debug(t: Throwable? = null, message: () -> String) {
         )
     }
 }
+fun info(t: Throwable? = null, message: String) = info(t) { message }
 inline fun info(t: Throwable? = null, message: () -> String) = log(
     logPrefix = "INFO",
     t = t,
     message = message()
 )
+fun warn(t: Throwable? = null, message: String) = warn(t) { message }
 inline fun warn(t: Throwable? = null, message: () -> String) = log(
     logPrefix = "WARN",
     t = t,
     message = message()
 )
+fun err(t: Throwable? = null, message: String) = err(t) { message }
 inline fun err(t: Throwable? = null, message: () -> String) = logError(
     logPrefix = "ERROR",
     t = t,
