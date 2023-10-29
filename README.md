@@ -1,5 +1,5 @@
 # Godot Kotlin Jvm utilities
-This is a small library providing common utilities which might be useful in many godot kotlin jvm projects.
+This is a small library providing common utilities which might be useful in many [godot kotlin jvm](https://github.com/utopia-rise/godot-kotlin-jvm) projects.
 
 > **Note:** this library is basically just a collection of little things i wrote over and over in small projects and now just extracted into this common library. Consider it untested and inefficient! Feel free to use and improve it. PR's are very welcome.
 
