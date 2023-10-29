@@ -103,3 +103,63 @@ launch(mainDispatcher()) {
     // your code running on the main thread
 }
 ```
+
+### Coroutine scope
+Allows you to launch kotlin coroutines from within a node. In the case of ui nodes, it also provides you the means to run continuations on the context of the ui (you can freely choose where, by calling `resumeUiContinuations`).
+
+**Note:** It is very important that if you use `withUiContext` you also have a `resumeUiContinuations` call in your node! Otherwise all coroutines which use `withUiContext` will block indefinitely and cause memory leaks for good measure! 
+
+```kotlin
+@RegisterClass
+class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() {
+  // by default, runs coroutines on the dispatcher `Dispatchers.Default` with a `SupervisorJob`. Errors in coroutines are propagated by throwing
+  // you can however override the scope if you  want (this example is the actual default implementation):
+  // OPTIONAL BLOCK: START
+  override val coroutineContext: CoroutineContext =
+    defaultDispatcher() + SupervisorJob() + object : CoroutineExceptionHandler {
+      override val key: CoroutineContext.Key<*> = CoroutineExceptionHandler
+      override fun handleException(context: CoroutineContext, exception: Throwable) {
+        throw exception
+      }
+    }
+  // OPTIONAL BLOCK: END
+
+  @Export
+  @RegisterProperty
+  lateinit var label: Label
+
+  @Export
+  @RegisterProperty
+  lateinit var button: Button
+
+  @RegisterFunction
+  override fun _ready() {
+    button.pressed.connect(this, TestNode::onButtonPressed)
+  }
+
+  @RegisterFunction
+  override fun _process(delta: Double) {
+    resumeUiContinuations() // this resumes any continuations started with `withUiContext`. You can place it anywhere you want to. It basically runs all pending blocks of `withUiContext` synchronously in the order they were added
+  }
+
+  @RegisterFunction
+  fun onButtonPressed() {
+    launch {
+      // using default dispatcher defined by DefaultGodotCoroutineScope
+      // do some work
+      println("BACKGROUND: Executing work on background dispatcher")
+
+      delay(100)
+      val resultOfWork = "result of work"
+
+      withUiContext { 
+        // the code here runs the next time you call `resumeUiContinuations`. Which in this example, is the next time `_process` is called
+        println("UICONTEXT: Setting label")
+        label.text = resultOfWork
+      }
+      delay(100)
+      println("BACKGROUND: Executing more work on background dispatcher")
+    }
+  }
+}
+```
