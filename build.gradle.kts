@@ -1,5 +1,6 @@
 plugins {
     id("com.utopia-rise.godot-kotlin-jvm") version "0.7.2-4.1.2"
+    `maven-publish`
 }
 
 group = "ch.hippmann.godot"
@@ -22,4 +23,26 @@ dependencies {
 
 kotlin {
     jvmToolchain(17)
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        @Suppress("UNUSED_VARIABLE")
+        val utilities by creating(MavenPublication::class) {
+            pom {
+                name.set(project.name)
+                description.set("Helpful godot kotlin jvm utilities.")
+            }
+            artifactId = "utilities"
+            description = "Helpful godot kotlin jvm utilities."
+            artifact(tasks.jar)
+            artifact(tasks.getByName("sourcesJar"))
+            artifact(tasks.getByName("javadocJar"))
+        }
+    }
 }
