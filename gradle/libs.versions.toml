@@ -1,0 +1,16 @@
+[versions]
+godot-kotlin-jvm-utilities = "0.0.1"
+jvmToolchainVersion = "17"
+
+godot-kotlin-jvm="0.8.1-4.2.0" # https://github.com/utopia-rise/godot-kotlin-jvm/releases
+
+kotlinx-coroutines-core="1.7.3" # https://github.com/Kotlin/kotlinx.coroutines/releases
+
+
+[libraries]
+godot-kotlin-jvm = { group = "com.utopia-rise", name = "godot-library-release", version.ref = "godot-kotlin-jvm" }
+
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+
+[plugins]
+godot-kotlin-jvm = { id = "com.utopia-rise.godot-kotlin-jvm", version.ref = "godot-kotlin-jvm" }
