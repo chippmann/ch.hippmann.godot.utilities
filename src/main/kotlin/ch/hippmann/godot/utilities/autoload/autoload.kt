@@ -2,7 +2,7 @@ package ch.hippmann.godot.utilities.autoload
 
 import ch.hippmann.godot.utilities.data.WeakRefMap
 import godot.Node
-import godot.extensions.asNodePath
+import godot.core.asNodePath
 
 
 @PublishedApi
