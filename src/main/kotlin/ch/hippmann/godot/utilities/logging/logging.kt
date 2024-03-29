@@ -1,10 +1,13 @@
 package ch.hippmann.godot.utilities.logging
 
+import godot.MultiplayerAPI
+import godot.MultiplayerPeer
 import godot.OS
 import godot.global.GD
 
 @PublishedApi
 internal val isDebugBuild by lazy { OS.isDebugBuild() }
+var peerIdForLogging: Int? = null
 
 fun debug(message: String, t: Throwable? = null) = debug(t) { message }
 inline fun debug(t: Throwable? = null, message: () -> String) {
@@ -38,12 +41,24 @@ inline fun err(t: Throwable? = null, message: () -> String) = logError(
 
 @PublishedApi
 internal fun log(logPrefix: String, t: Throwable?, message: String) {
-    GD.print("$logPrefix:\t$message")
+    val peerId = peerIdForLogging
+    val peerPrefix = if (peerId != null) {
+        "Peer($peerId):\t"
+    } else {
+        ""
+    }
+    GD.print("$logPrefix:\t$peerPrefix$message")
     t?.let { throwable -> GD.print(throwable.stackTraceToString()) }
 }
 
 @PublishedApi
 internal fun logError(logPrefix: String, t: Throwable?, message: String) {
-    GD.printErr("$logPrefix:\t$message")
+    val peerId = peerIdForLogging
+    val peerPrefix = if (peerId != null) {
+        "Peer($peerId):\t"
+    } else {
+        ""
+    }
+    GD.printErr("$logPrefix:\t$peerPrefix$message")
     t?.let { throwable -> GD.print(throwable.stackTraceToString()) }
 }

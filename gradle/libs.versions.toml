@@ -2,7 +2,7 @@
 godot-kotlin-jvm-utilities = "0.0.1"
 jvmToolchainVersion = "17"
 
-godot-kotlin-jvm="0.8.1-4.2.0" # https://github.com/utopia-rise/godot-kotlin-jvm/releases
+godot-kotlin-jvm="0.8.3-4.2.1-d32742d-SNAPSHOT" # https://github.com/utopia-rise/godot-kotlin-jvm/releases
 
 kotlinx-coroutines-core="1.7.3" # https://github.com/Kotlin/kotlinx.coroutines/releases
 

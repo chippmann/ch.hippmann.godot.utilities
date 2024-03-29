@@ -7,6 +7,7 @@ group = "ch.hippmann.godot"
 version = libs.versions.godot.kotlin.jvm.utilities.get()
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
