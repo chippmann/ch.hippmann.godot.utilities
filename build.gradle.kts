@@ -1,6 +1,7 @@
 plugins {
+    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.godot.kotlin.jvm)
-    `maven-publish`
+    id("ch.hippmann.publish")
 }
 
 group = "ch.hippmann.godot"
@@ -26,24 +27,53 @@ kotlin {
     jvmToolchain(libs.versions.jvmToolchainVersion.get().toInt())
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
+val projectName = name
+val baseUrl = "github.com/chippmann/ch.hippmann.godot.utilities"
 
-publishing {
-    publications {
-        @Suppress("UNUSED_VARIABLE")
-        val utilities by creating(MavenPublication::class) {
-            pom {
-                name.set(project.name)
-                description.set("Helpful godot kotlin jvm utilities.")
+publish {
+    mavenCentralUser = project.propOrEnv("MAVEN_CENTRAL_USERNAME")
+    mavenCentralPassword = project.propOrEnv("MAVEN_CENTRAL_PASSWORD")
+    gpgInMemoryKey = project.propOrEnv("GPG_IN_MEMORY_KEY")
+    gpgPassword = project.propOrEnv("GPG_PASSWORD")
+
+    pom {
+        name.set(projectName)
+        description.set("Helpful godot kotlin jvm utilities.")
+        url.set("https://$baseUrl")
+        licenses {
+            license {
+                name.set("MIT License")
+                url.set("https://$baseUrl/blob/main/LICENSE")
+                distribution.set("https://$baseUrl/blob/main/LICENSE")
             }
-            artifactId = "utilities"
-            description = "Helpful godot kotlin jvm utilities."
-            artifact(tasks.jar)
-            artifact(tasks.getByName("sourcesJar"))
-            artifact(tasks.getByName("javadocJar"))
+        }
+        developers {
+            developer {
+                id.set("maintainer")
+                name.set("Cedric Hippmann")
+                url.set("https://github.com/chippmann")
+                email.set("cedric@hippmann.com")
+            }
+        }
+        scm {
+            connection.set("scm:git:https://$baseUrl")
+            developerConnection.set("scm:git:$baseUrl.git")
+            tag.set("main")
+            url.set("https://$baseUrl")
         }
     }
+}
+
+tasks {
+    shadowJar.configure {
+        enabled = false
+    }
+}
+
+fun Project.propOrEnv(name: String): String? {
+    var property: String? = findProperty(name) as String?
+    if (property == null) {
+        property = System.getenv(name)
+    }
+    return property
 }
