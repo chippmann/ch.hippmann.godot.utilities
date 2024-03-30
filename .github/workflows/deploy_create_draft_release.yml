@@ -1,0 +1,44 @@
+name: 📝 Create draft release
+
+on:
+  workflow_call:
+    inputs:
+      jvm-version:
+        type: string
+
+jobs:
+  create-draft-release:
+    name: Create github draft release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # clone whole history -> needed for generation of changelog
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: adopt-hotspot
+          java-version: ${{ inputs.jvm-version }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: false
+
+      - name: Generate changelog
+        shell: sh
+        run: |
+          ./gradlew generateChangelog --stacktrace
+
+      - name: Create draft release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: false
+          body_path: build/changelog.md

@@ -1,79 +1,42 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.godot.kotlin.jvm)
-    id("ch.hippmann.publish")
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.godot.kotlin.jvm) apply false
+    alias(libs.plugins.grgit)
 }
 
-group = "ch.hippmann.godot"
-version = libs.versions.godot.kotlin.jvm.utilities.get()
-
-repositories {
-    mavenLocal()
-    mavenCentral()
+val versionString = libs.versions.godot.kotlin.jvm.utilities.get()
+subprojects {
+    group = "ch.hippmann.godot"
+    version = versionString
 }
 
-godot {
-    classPrefix.set("Util")
-    projectName.set("utilities")
-    isRegistrationFileGenerationEnabled.set(false)
-}
-
-dependencies {
-    compileOnly(libs.godot.kotlin.jvm)
-    implementation(libs.kotlinx.coroutines.core)
-}
-
-kotlin {
-    jvmToolchain(libs.versions.jvmToolchainVersion.get().toInt())
-}
-
-val projectName = name
 val baseUrl = "github.com/chippmann/ch.hippmann.godot.utilities"
-
-publish {
-    mavenCentralUser = project.propOrEnv("MAVEN_CENTRAL_USERNAME")
-    mavenCentralPassword = project.propOrEnv("MAVEN_CENTRAL_PASSWORD")
-    gpgInMemoryKey = project.propOrEnv("GPG_IN_MEMORY_KEY")
-    gpgPassword = project.propOrEnv("GPG_PASSWORD")
-
-    pom {
-        name.set(projectName)
-        description.set("Helpful godot kotlin jvm utilities.")
-        url.set("https://$baseUrl")
-        licenses {
-            license {
-                name.set("MIT License")
-                url.set("https://$baseUrl/blob/main/LICENSE")
-                distribution.set("https://$baseUrl/blob/main/LICENSE")
-            }
-        }
-        developers {
-            developer {
-                id.set("maintainer")
-                name.set("Cedric Hippmann")
-                url.set("https://github.com/chippmann")
-                email.set("cedric@hippmann.com")
-            }
-        }
-        scm {
-            connection.set("scm:git:https://$baseUrl")
-            developerConnection.set("scm:git:$baseUrl.git")
-            tag.set("main")
-            url.set("https://$baseUrl")
-        }
-    }
-}
-
 tasks {
-    shadowJar.configure {
-        enabled = false
-    }
-}
+    val generateChangelog by creating {
+        group = "changelog"
 
-fun Project.propOrEnv(name: String): String? {
-    var property: String? = findProperty(name) as String?
-    if (property == null) {
-        property = System.getenv(name)
+        doLast {
+            val tags = grgit.tag.list().reversed().filter { !it.name.endsWith("-SNAPSHOT") }
+            val fromTag = tags.getOrNull(1) ?: grgit.log().last()
+            val toTag = tags.getOrNull(0)
+            val changeLogPrefix = """
+                **Changelog:**
+                
+            """.trimIndent()
+
+            val changelogString = grgit.log {
+                range(fromTag, toTag?.name)
+            }
+                .joinToString(separator = "\n", prefix = changeLogPrefix) { commit ->
+                    val link = "https://$baseUrl/commit/${commit.id}"
+                    "- [${commit.abbreviatedId}]($link) ${commit.shortMessage}"
+                }
+
+            project.layout.buildDirectory.asFile.get().resolve("changelog.md").also {
+                if (!it.parentFile.exists()) {
+                    it.parentFile.mkdirs()
+                }
+            }.writeText(changelogString)
+        }
     }
-    return property
 }

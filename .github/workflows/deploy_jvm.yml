@@ -1,0 +1,43 @@
+name: 🚀 Deploy Jvm
+
+on:
+  workflow_call:
+    inputs:
+      jvm-version:
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: adopt-hotspot
+          java-version: ${{ inputs.jvm-version }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: false
+
+      - name: Publish
+        shell: sh
+        run: |
+          echo "mavenCentralUsername=$MAVEN_CENTRAL_USERNAME" >> ~/.gradle/gradle.properties
+          echo "mavenCentralPassword=$MAVEN_CENTRAL_PASSWORD" >> ~/.gradle/gradle.properties
+          echo "signingInMemoryKey=$GPG_IN_MEMORY_KEY" >> ~/.gradle/gradle.properties
+          echo "signingInMemoryKeyPassword=$GPG_PASSWORD" >> ~/.gradle/gradle.properties
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          GPG_IN_MEMORY_KEY: ${{ secrets.GPG_IN_MEMORY_KEY }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
+
+      - name: Publish
+        shell: sh
+        run: |
+          ./gradlew publishToMavenCentral

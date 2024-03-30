@@ -1,17 +1,17 @@
 pluginManagement {
     includeBuild("build-logic")
+
     repositories {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
     }
-    resolutionStrategy.eachPlugin {
-        if (requested.id.id == "com.utopia-rise.godot-kotlin-jvm") {
-            useModule("com.utopia-rise:godot-gradle-plugin:${requested.version}")
-        }
-        if (requested.id.id == "com.utopia-rise.api-generator") {
-            useModule("com.utopia-rise:api-generator:${requested.version}")
-        }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
     }
 }
 
@@ -20,3 +20,5 @@ plugins {
 }
 
 rootProject.name = "utilities"
+
+include("utilities")

@@ -1,7 +1,5 @@
 package ch.hippmann.godot.utilities.logging
 
-import godot.MultiplayerAPI
-import godot.MultiplayerPeer
 import godot.OS
 import godot.global.GD
 
