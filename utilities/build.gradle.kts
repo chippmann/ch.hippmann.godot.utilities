@@ -30,12 +30,12 @@ kotlin {
 val projectName = name
 val baseUrl = "github.com/chippmann/ch.hippmann.godot.utilities"
 publishConfig {
-    this.mavenCentralUser = project.propOrEnv("mavenCentralUsername")
-    this.mavenCentralPassword = project.propOrEnv("mavenCentralPassword")
-    this.gpgInMemoryKey = project.propOrEnv("signingInMemoryKey")
-    this.gpgPassword = project.propOrEnv("signingInMemoryKeyPassword")
+    mavenCentralUser = project.propOrEnv("mavenCentralUsername")
+    mavenCentralPassword = project.propOrEnv("mavenCentralPassword")
+    gpgInMemoryKey = project.propOrEnv("signingInMemoryKey")
+    gpgPassword = project.propOrEnv("signingInMemoryKeyPassword")
 
-    this.pom {
+    pom {
         name.set(projectName)
         description.set("Helpful godot kotlin jvm utilities.")
         url.set("https://$baseUrl")
@@ -64,6 +64,7 @@ publishConfig {
 }
 
 tasks {
+    // disable shadow jar creation to be able to publish (otherwise we have a jar conflict. It's not needed anyways. Ideally this should be fixed in Godot Kotlin directly)
     shadowJar.configure {
         enabled = false
     }

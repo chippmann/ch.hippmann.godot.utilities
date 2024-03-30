@@ -4,42 +4,19 @@ This is a small library providing common utilities which might be useful in many
 > **Note:** this library is basically just a collection of little things i wrote over and over in small projects and now just extracted into this common library. Consider it untested and inefficient! Feel free to use and improve it. PR's are very welcome.
 
 ## Usage
-At the moment this library is not pushed to maven central. In order to use it, you'll either have to facilitate gradles composite build feature or publish it locally.
+Add the project as a dependency to you project. As it is published to maven central, you should also make sure that you have maven central set up as a repository:
+```kotlin
+repositories {
+    mavenCentral()
+}
 
-### Composite build
-- Clone the project
-- Add the following to the project in which you intend to use this library:
-  ```kotlin
-  // settings.gradle.kts
-  includeBuild("path/to/this/library/cloned/to/your/machine") {
-    dependencySubstitution {
-        substitute(module("ch.hippmann.godot:utilities")).using(project(":"))
-    }
-  }
-  ```
-  ```kotlin
-  // build.gradle.kts
-  dependencies {
-    implementation("ch.hippmann.godot:utilities:0.0.1")
-    
-    // if you plan on using the coroutine helpers; don't forget to add the kotlinx coroutines dependency:
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-  }
-  ```
+dependencies {
+    implementation("ch.hippmann.godot:utilities:<version>")
 
-### Publish locally
-- Clone the project
-- `gradlew publishToMavenLocal`
-- Add the following to the project in which you intend to use this library:
-  ```kotlin
-  // build.gradle.kts
-  dependencies {
-    implementation("ch.hippmann.godot:utilities:0.0.1")
-    
     // if you plan on using the coroutine helpers; don't forget to add the kotlinx coroutines dependency:
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-  }
-  ```
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<version>")
+}
+```
 
 ## Utilities and their usage
 ### Autoload
