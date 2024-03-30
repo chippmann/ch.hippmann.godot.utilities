@@ -4,7 +4,7 @@ This is a small library providing common utilities which might be useful in many
 > **Note:** this library is basically just a collection of little things i wrote over and over in small projects and now just extracted into this common library. Consider it untested and inefficient! Feel free to use and improve it. PR's are very welcome.
 
 ## Usage
-Add the project as a dependency to you project. As it is published to maven central, you should also make sure that you have maven central set up as a repository:
+Add the library as a dependency to your project. As it is published to maven central, you should also make sure that you have maven central set up as a repository:
 ```kotlin
 repositories {
     mavenCentral()
