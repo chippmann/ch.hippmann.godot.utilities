@@ -98,6 +98,7 @@ interface GodotCoroutineScope : CoroutineScope {
     )
 }
 
+@Suppress("unused")
 class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScope {
     private val uiContinuationsMutex = Mutex()
     private val uiContinuations: Queue<GodotContinuationWithBlock> = LinkedList()
