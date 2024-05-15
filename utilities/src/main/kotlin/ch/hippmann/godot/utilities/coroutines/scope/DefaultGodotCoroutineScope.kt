@@ -13,8 +13,8 @@ import kotlin.coroutines.suspendCoroutine
 
 @Suppress("unused")
 class DefaultGodotCoroutineScope : GodotCoroutineScope {
-    private val uiContinuationsMutex = Mutex()
-    private val uiContinuations: Queue<GodotContinuationWithBlock> = LinkedList()
+    private val godotContinuationsMutex = Mutex()
+    private val godotContinuations: Queue<GodotContinuationWithBlock> = LinkedList()
 
     override val coroutineContext: CoroutineContext =
         defaultDispatcher() + SupervisorJob() + object : CoroutineExceptionHandler {
@@ -24,17 +24,17 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
             }
         }
 
-    private suspend fun addUiContinuation(continuation: GodotContinuation, block: () -> Unit) {
-        uiContinuationsMutex.withLock {
-            uiContinuations.add(continuation to block)
+    private suspend fun addGodotContinuation(continuation: GodotContinuation, block: () -> Unit) {
+        godotContinuationsMutex.withLock {
+            godotContinuations.add(continuation to block)
         }
     }
 
     override fun Node.resumeGodotContinuations() {
         runBlocking {
-            uiContinuationsMutex.withLock {
-                while (uiContinuations.isNotEmpty()) {
-                    val (continuation, block) = uiContinuations.remove()
+            godotContinuationsMutex.withLock {
+                while (godotContinuations.isNotEmpty()) {
+                    val (continuation, block) = godotContinuations.remove()
                     block()
                     continuation.resume()
                 }
@@ -45,7 +45,7 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
     override suspend fun Node.withGodotContext(block: () -> Unit) {
         suspendCoroutine { continuation ->
             runBlocking {
-                addUiContinuation(continuation, block)
+                addGodotContinuation(continuation, block)
             }
         }
     }

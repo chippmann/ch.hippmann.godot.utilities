@@ -92,9 +92,9 @@ launch(mainDispatcher()) {
 ```
 
 ### Godot coroutine scope
-Allows you to launch kotlin coroutines from within a node. In the case of ui nodes, it also provides you the means to run continuations in the context of the ui (you can freely choose where, by calling `resumeUiContinuations`).
+Allows you to launch kotlin coroutines from within a node. In the case of ui nodes, it also provides you the means to run continuations in the context of the ui (you can freely choose where, by calling `resumeGodotContinuations`).
 
-**Note:** It is very important that if you use `withUiContext` you also have a `resumeUiContinuations` call in your node! Otherwise all coroutines which use `withUiContext` will block indefinitely and cause memory leaks for good measure! 
+**Note:** It is very important that if you use `withGodotContext` you also have a `resumeGodotContinuations` call in your node! Otherwise all coroutines which use `withGodotContext` will block indefinitely and cause memory leaks for good measure! 
 
 ```kotlin
 @RegisterClass
@@ -126,7 +126,7 @@ class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() 
 
   @RegisterFunction
   override fun _process(delta: Double) {
-    resumeUiContinuations() // this resumes any continuations started with `withUiContext`. You can place it anywhere you want to. It basically runs all pending blocks of `withUiContext` synchronously in the order they were added
+    resumeGodotContinuations() // this resumes any continuations started with `withGodotContext`. You can place it anywhere you want to. It basically runs all pending blocks of `withGodotContext` synchronously in the order they were added
   }
 
   @RegisterFunction
@@ -139,8 +139,8 @@ class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() 
       delay(100)
       val resultOfWork = "result of work"
 
-      withUiContext { 
-        // the code here runs the next time you call `resumeUiContinuations`. Which in this example, is the next time `_process` is called
+      withGodotContext { 
+        // the code here runs the next time you call `resumeGodotContinuations`. Which in this example, is the next time `_process` is called
         println("UICONTEXT: Setting label")
         label.text = resultOfWork
       }
