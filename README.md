@@ -154,7 +154,7 @@ class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() 
 ### Await signals
 Allows you to await signal emitions inside coroutines.
 
-**Note:** Necessitates the setup of [Coroutine dispatchers](#coroutine-dispatchers) and implicitly applies [GodotCoroutineScope](#godot-coroutine-scope)!
+> **Note:** Necessitates the setup of [Coroutine dispatchers](#coroutine-dispatchers) and implicitly applies [GodotCoroutineScope](#godot-coroutine-scope)!
 
 You must call `initSignalAwait` before any call to the `await` function!
 
