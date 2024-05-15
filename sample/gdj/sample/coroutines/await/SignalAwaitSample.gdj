@@ -7,10 +7,11 @@ relativeSourcePath = src/main/kotlin/sample/coroutines/await/SignalAwaitSample.k
 baseType = Node
 supertypes = [
     godot.Node,
-	ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope,
+	ch.hippmann.godot.utilities.coroutines.await.SignalAwaitable,
 	godot.Object,
 	godot.core.KtObject,
 	kotlin.Any,
+	ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope,
 	kotlinx.coroutines.CoroutineScope
 ]
 signals = [
@@ -23,14 +24,14 @@ properties = [
 functions = [
     _enter_tree,
 	_ready,
-	godot_coroutine_scope_signal_callback0_args,
-	godot_coroutine_scope_signal_callback1_args,
-	godot_coroutine_scope_signal_callback2_args,
-	godot_coroutine_scope_signal_callback3_args,
-	godot_coroutine_scope_signal_callback4_args,
-	godot_coroutine_scope_signal_callback5_args,
-	godot_coroutine_scope_signal_callback6_args,
-	godot_coroutine_scope_signal_callback7_args,
-	godot_coroutine_scope_signal_callback8_args,
-	godot_coroutine_scope_trigger_continuations
+	signal_awaitable_signal_callback0_args,
+	signal_awaitable_signal_callback1_args,
+	signal_awaitable_signal_callback2_args,
+	signal_awaitable_signal_callback3_args,
+	signal_awaitable_signal_callback4_args,
+	signal_awaitable_signal_callback5_args,
+	signal_awaitable_signal_callback6_args,
+	signal_awaitable_signal_callback7_args,
+	signal_awaitable_signal_callback8_args,
+	signal_awaitable_trigger_continuations
 ]
