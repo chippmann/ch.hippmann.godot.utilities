@@ -3,6 +3,16 @@ This is a small library providing common utilities which might be useful in many
 
 > **Note:** this library is basically just a collection of little things i wrote over and over in small projects and now just extracted into this common library. Consider it untested and inefficient! Feel free to use and improve it. PR's are very welcome.
 
+## Table of Contents
+
+- [Adding to your project](#adding-to-your-project)
+- [Utilities and their usage](#utilities-and-their-usage)
+    - [Autoload](#autoload)
+    - [Logging](#logging)
+    - [Coroutine dispatchers](#coroutine-dispatchers)
+    - [Godot coroutine scope](#godot-coroutine-scope)
+    - [Await signals](#await-signals)
+
 ## Adding to your project
 Add the library as a dependency to your project. As it is published to maven central, you should also make sure that you have maven central set up as a repository:
 ```kotlin
