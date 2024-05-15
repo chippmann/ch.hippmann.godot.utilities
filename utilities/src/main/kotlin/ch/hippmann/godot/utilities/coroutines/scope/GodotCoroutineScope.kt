@@ -173,6 +173,15 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
     override suspend fun Signal.await(): Array<Any?> {
         val owner = this@DefaultGodotCoroutineScope.owner?.get()
             ?: throw IllegalStateException("There is not owner set! Did you forget to call initSignalAwait in the constructor?")
+
+        // directly emit
+        when {
+            this.name == owner.treeEntered.name && owner.isInsideTree() -> return arrayOf()
+            this.name == owner.ready.name && owner.isNodeReady() -> return arrayOf()
+            this.name == owner.treeExiting.name && !owner.isInsideTree() -> return arrayOf()
+            this.name == owner.treeExited.name && !owner.isNodeReady() -> return arrayOf()
+        }
+
         val signalName = this.name.toString()
         val callable = provideCallable(owner, signalName)
 

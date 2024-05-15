@@ -54,5 +54,11 @@ class SignalAwaitSample: Node(), GodotCoroutineScope by DefaultGodotCoroutineSco
         GD.print("Node is ready! Any signal await messages should appear after this line!")
         customSignalWithArgs.emit("some custom data string we emitted for testing")
         customSignalForMultiAwaitTest.emit()
+
+        launch {
+            GD.print("Before await for ${::treeEntered.name} signal to test signal emition for already passed events")
+            treeEntered.await()
+            GD.print("After await for ${::treeEntered.name} signal to test signal emition for already passed events")
+        }
     }
 }
