@@ -140,3 +140,36 @@ class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() 
   }
 }
 ```
+
+### Await signals
+Allows you to await signal emitions inside coroutines.
+
+**Note:** Necessitates the setup of [Coroutine dispatchers](#coroutine-dispatchers) and implicitly applies [GodotCoroutineScope](#godot-coroutine-scope)!
+
+You must call `initSignalAwait` before any call to godot lifecycle function (like `_enterTree`) is performed and before any call to the `await` function!
+
+Example:
+```kotlin
+@RegisterClass
+class SignalAwaitSample: Node(), SignalAwaitable by SignalAwaiter() {
+    init {
+        // needs to be called before any godot lifecycle function like `_enterTree` is called!
+        initSignalAwait()
+    }
+
+    @RegisterFunction
+    override fun _enterTree() {
+        launch {
+            GD.print("Before await for ${::ready.name} signal")
+            ready.await()
+            GD.print("Node appears to be ready according to signal await")
+        }
+        runBlocking { delay(1.seconds) } // to give background thread some time to run in this over simplified example
+    }
+
+    @RegisterFunction
+    override fun _ready() {
+        GD.print("Node is ready! Any signal await messages should appear after this line!")
+    }
+}
+```
