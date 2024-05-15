@@ -35,7 +35,9 @@ private data class AwaitDataContainer(
     val continuation: Continuation<Array<Any?>>,
     val callable: Callable,
     val signalName: StringName,
-)
+) {
+    fun assembleKey(owner: Node): String = "${owner.id}_${signalName}_${callable.getMethod()}"
+}
 
 @Suppress("unused")
 class SignalAwaiter(
@@ -56,8 +58,6 @@ class SignalAwaiter(
     }
 
     private val continuationMapLock = Mutex()
-
-    // callable as well only to keep a strong ref to it. Get's cleared later
     private val continuationMap: MutableMap<String, List<AwaitDataContainer>> = mutableMapOf()
 
     override suspend fun Signal.await(): Array<Any?> {
@@ -65,7 +65,7 @@ class SignalAwaiter(
             if (OS.isDebugBuild()) {
                 throw IllegalStateException("There is not owner set! Did you forget to call initSignalAwait in the constructor?")
             } else {
-                err { "There is not owner set! Did you forget to call initSignalAwait in the constructor? Returning empty array and will not await anything" }
+                err { "There is not owner set! Did you forget to call initSignalAwait in the constructor? Returning empty array immediately and will not await anything" }
             }
             return arrayOf()
         }
@@ -95,7 +95,7 @@ class SignalAwaiter(
         return suspendCoroutine { continuation ->
             runBlocking {
                 continuationMapLock.withLock {
-                    val key = "${owner.id}_${signalName}_${callable.getMethod()}"
+                    val key = assembleKey(owner, signalName, callable.getMethod().toString())
                     val dataList = continuationMap[key]?.toMutableList() ?: mutableListOf()
                     continuationMap[key] = dataList.apply {
                         add(
@@ -141,6 +141,43 @@ class SignalAwaiter(
         ).bind(signalName)
     }
 
+    private fun signalAwaitableSignalCallback(args: Array<Any?>, signalName: String, callableName: String) {
+        debugLog { "Received signal emition from signal: $signalName for callable: $callableName. Provided args: $args" }
+        runBlocking {
+            val owner = owner?.get() ?: run {
+                err { "There is not owner present anymore! No op" }
+                return@runBlocking
+            }
+            val key = assembleKey(owner, signalName, callableName)
+            val awaitDataContainers = continuationMapLock.withLock {
+                continuationMap.remove(key)
+            } ?: run {
+                err { "No await data found for key $key" }
+                return@runBlocking
+            }
+
+            awaitDataContainers.forEach { awaitDataContainer ->
+                debugLog { "Await data found: $awaitDataContainer. Resuming continuation" }
+                awaitDataContainer.continuation.resume(args)
+
+                if (owner.isConnected(awaitDataContainer.signalName, awaitDataContainer.callable)) {
+                    debugLog { "Disconnecting signal for await data: $awaitDataContainer." }
+                    owner.disconnect(awaitDataContainer.signalName, awaitDataContainer.callable)
+                }
+            }
+        }
+    }
+
+    private inline fun debugLog(message: () -> String) {
+        if (printDebug) {
+            debug(message = message)
+        }
+    }
+
+    private fun assembleKey(owner: Node, signalName: String, callableName: String) =
+        "${owner.id}_${signalName}_${callableName}"
+
+    // START: await callback registered functions
     override fun signalAwaitableSignalCallback0Args(signalName: String) {
         signalAwaitableSignalCallback(
             args = arrayOf(),
@@ -259,37 +296,5 @@ class SignalAwaiter(
     override fun signalAwaitableTriggerContinuations() {
         owner?.get()?.resumeGodotContinuations()
     }
-
-    private fun signalAwaitableSignalCallback(args: Array<Any?>, signalName: String, callableName: String) {
-        debugLog { "Received signal emition from signal: $signalName for callable: $callableName. Provided args: $args" }
-        runBlocking {
-            val owner = owner?.get() ?: run {
-                err { "There is not owner present anymore! No op" }
-                return@runBlocking
-            }
-            val key = "${owner.id}_${signalName}_${callableName}"
-            val awaitDataContainers = continuationMapLock.withLock {
-                continuationMap.remove(key)
-            } ?: run {
-                err { "No await data found for key $key" }
-                return@runBlocking
-            }
-
-            awaitDataContainers.forEach { awaitDataContainer ->
-                debugLog { "Await data found: $awaitDataContainer. Resuming continuation" }
-                awaitDataContainer.continuation.resume(args)
-
-                if (owner.isConnected(awaitDataContainer.signalName, awaitDataContainer.callable)) {
-                    debugLog { "Disconnecting signal for await data: $awaitDataContainer." }
-                    owner.disconnect(awaitDataContainer.signalName, awaitDataContainer.callable)
-                }
-            }
-        }
-    }
-
-    private inline fun debugLog(message: () -> String) {
-        if (printDebug) {
-            debug(message = message)
-        }
-    }
+    // END: await callback registered functions
 }

@@ -146,14 +146,14 @@ Allows you to await signal emitions inside coroutines.
 
 **Note:** Necessitates the setup of [Coroutine dispatchers](#coroutine-dispatchers) and implicitly applies [GodotCoroutineScope](#godot-coroutine-scope)!
 
-You must call `initSignalAwait` before any call to godot lifecycle function (like `_enterTree`) is performed and before any call to the `await` function!
+You must call `initSignalAwait` before any call to the `await` function!
 
 Example:
 ```kotlin
 @RegisterClass
 class SignalAwaitSample: Node(), SignalAwaitable by SignalAwaiter() {
     init {
-        // needs to be called before any godot lifecycle function like `_enterTree` is called!
+        // needs to be called before any call to `await`!
         initSignalAwait()
     }
 
