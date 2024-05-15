@@ -1,0 +1,36 @@
+// THIS FILE IS GENERATED! DO NOT EDIT OR DELETE IT. EDIT OR DELETE THE ASSOCIATED SOURCE CODE FILE INSTEAD
+// Note: You can however freely move this file inside your godot project if you want. Keep in mind however, that if you rename the originating source code file, this file will be deleted and regenerated as a new file instead of being updated! Other modifications to the source file however, will result in this file being updated.
+
+registeredName = SignalAwaitSample
+fqName = sample.coroutines.await.SignalAwaitSample
+relativeSourcePath = src/main/kotlin/sample/coroutines/await/SignalAwaitSample.kt
+baseType = Node
+supertypes = [
+    godot.Node,
+	ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope,
+	godot.Object,
+	godot.core.KtObject,
+	kotlin.Any,
+	kotlinx.coroutines.CoroutineScope
+]
+signals = [
+    custom_signal_with_args,
+	custom_signal_for_multi_await_test
+]
+properties = [
+    
+]
+functions = [
+    _enter_tree,
+	_ready,
+	_process,
+	godot_coroutine_scope_signal_callback0_args,
+	godot_coroutine_scope_signal_callback1_args,
+	godot_coroutine_scope_signal_callback2_args,
+	godot_coroutine_scope_signal_callback3_args,
+	godot_coroutine_scope_signal_callback4_args,
+	godot_coroutine_scope_signal_callback5_args,
+	godot_coroutine_scope_signal_callback6_args,
+	godot_coroutine_scope_signal_callback7_args,
+	godot_coroutine_scope_signal_callback8_args
+]

@@ -2,11 +2,12 @@ package ch.hippmann.godot.utilities.coroutines.scope
 
 import ch.hippmann.godot.utilities.coroutines.defaultDispatcher
 import ch.hippmann.godot.utilities.coroutines.mainDispatcher
-import godot.Control
 import godot.Object
 import godot.annotation.RegisterFunction
 import godot.core.Callable
+import godot.core.StringName
 import godot.core.asStringName
+import godot.global.GD
 import godot.signals.Signal
 import godot.signals.Signal0
 import godot.signals.Signal1
@@ -17,6 +18,7 @@ import godot.signals.Signal5
 import godot.signals.Signal6
 import godot.signals.Signal7
 import godot.signals.Signal8
+import godot.util.camelToSnakeCase
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -24,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -31,25 +34,26 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 interface GodotCoroutineScope : CoroutineScope {
-    fun Control.resumeGodotContinuations()
-    suspend fun Control.withGodotContext(block: () -> Unit)
+    fun initSignalAwait(owner: Object)
+    fun Object.resumeGodotContinuations()
+    suspend fun Object.withGodotContext(block: () -> Unit)
 
     suspend fun Signal.await(): Array<Any?>
 
     @RegisterFunction
-    fun godotCoroutineScopeSignalCallback0Args(callableId: String)
+    fun godotCoroutineScopeSignalCallback0Args(signalName: String)
 
     @RegisterFunction
-    fun godotCoroutineScopeSignalCallback1Args(arg0: Any?, callableId: String)
+    fun godotCoroutineScopeSignalCallback1Args(arg0: Any?, signalName: String)
 
     @RegisterFunction
-    fun godotCoroutineScopeSignalCallback2Args(arg0: Any?, arg1: Any?, callableId: String)
+    fun godotCoroutineScopeSignalCallback2Args(arg0: Any?, arg1: Any?, signalName: String)
 
     @RegisterFunction
-    fun godotCoroutineScopeSignalCallback3Args(arg0: Any?, arg1: Any?, arg2: Any?, callableId: String)
+    fun godotCoroutineScopeSignalCallback3Args(arg0: Any?, arg1: Any?, arg2: Any?, signalName: String)
 
     @RegisterFunction
-    fun godotCoroutineScopeSignalCallback4Args(arg0: Any?, arg1: Any?, arg2: Any?, arg3: Any?, callableId: String)
+    fun godotCoroutineScopeSignalCallback4Args(arg0: Any?, arg1: Any?, arg2: Any?, arg3: Any?, signalName: String)
 
     @RegisterFunction
     fun godotCoroutineScopeSignalCallback5Args(
@@ -58,7 +62,7 @@ interface GodotCoroutineScope : CoroutineScope {
         arg2: Any?,
         arg3: Any?,
         arg4: Any?,
-        callableId: String
+        signalName: String,
     )
 
     @RegisterFunction
@@ -69,7 +73,7 @@ interface GodotCoroutineScope : CoroutineScope {
         arg3: Any?,
         arg4: Any?,
         arg5: Any?,
-        callableId: String
+        signalName: String,
     )
 
     @RegisterFunction
@@ -81,7 +85,7 @@ interface GodotCoroutineScope : CoroutineScope {
         arg4: Any?,
         arg5: Any?,
         arg6: Any?,
-        callableId: String
+        signalName: String,
     )
 
     @RegisterFunction
@@ -94,12 +98,13 @@ interface GodotCoroutineScope : CoroutineScope {
         arg5: Any?,
         arg6: Any?,
         arg7: Any?,
-        callableId: String
+        signalName: String,
     )
 }
 
 @Suppress("unused")
-class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScope {
+class DefaultGodotCoroutineScope : GodotCoroutineScope {
+    private var owner: WeakReference<Object>? = null
     private val uiContinuationsMutex = Mutex()
     private val uiContinuations: Queue<GodotContinuationWithBlock> = LinkedList()
 
@@ -117,7 +122,11 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         }
     }
 
-    override fun Control.resumeGodotContinuations() {
+    override fun initSignalAwait(owner: Object) {
+        this.owner = WeakReference(owner)
+    }
+
+    override fun Object.resumeGodotContinuations() {
         runBlocking {
             uiContinuationsMutex.withLock {
                 while (uiContinuations.isNotEmpty()) {
@@ -131,7 +140,7 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         }
     }
 
-    override suspend fun Control.withGodotContext(block: () -> Unit) {
+    override suspend fun Object.withGodotContext(block: () -> Unit) {
         suspendCoroutine { continuation ->
             runBlocking {
                 addUiContinuation(continuation, block)
@@ -140,72 +149,107 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
     }
 
 
+    private data class AwaitDataContainer(
+        val continuation: Continuation<Array<Any?>>,
+        val callable: Callable,
+        val signalName: StringName,
+    )
+
     private val continuationMapLock = Mutex()
-    private val continuationMap: MutableMap<String, Continuation<Array<Any?>>> = mutableMapOf()
+
+    // callable as well only to keep a strong ref to it. Get's cleared later
+    private val continuationMap: MutableMap<String, List<AwaitDataContainer>> = mutableMapOf()
 
     override suspend fun Signal.await(): Array<Any?> {
-        val callableId = UUID.randomUUID().toString()
-        val callable = provideCallback(callableId)
-        return continuationMapLock.withLock {
-            suspendCoroutine { continuation ->
-                continuationMap[callableId] = continuation
-                this.connect(callable, Object.ConnectFlags.CONNECT_ONE_SHOT.id.toInt())
+        val owner = this@DefaultGodotCoroutineScope.owner?.get()
+            ?: throw IllegalStateException("There is not owner set! Did you forget to call initSignalAwait in the constructor?")
+        val signalName = this.name.toString()
+        val callable = provideCallable(owner, signalName)
+
+        return suspendCoroutine { continuation ->
+            runBlocking {
+                continuationMapLock.withLock {
+                    val key = "${owner.id}_${signalName}_${callable.getMethod()}"
+                    val dataList = continuationMap[key]?.toMutableList() ?: mutableListOf()
+                    continuationMap[key] = dataList.apply {
+                        add(
+                            AwaitDataContainer(
+                                continuation = continuation,
+                                callable = callable,
+                                signalName = this@await.name,
+                            )
+                        )
+                    }
+                }
+
+                owner.callDeferred(
+                    "connect".asStringName(),
+                    this@await.name,
+                    callable,
+                    Object.ConnectFlags.CONNECT_REFERENCE_COUNTED.id.toInt()
+                )
+                GD.print("Did connect")
             }
         }
     }
 
-    private fun Signal.provideCallback(callableId: String): Callable {
+    private fun Signal.provideCallable(owner: Object, signalName: String): Callable {
+        val function = when (this) {
+            is Signal0 -> ::godotCoroutineScopeSignalCallback0Args
+            is Signal1<*> -> ::godotCoroutineScopeSignalCallback1Args
+            is Signal2<*, *> -> ::godotCoroutineScopeSignalCallback2Args
+            is Signal3<*, *, *> -> ::godotCoroutineScopeSignalCallback3Args
+            is Signal4<*, *, *, *> -> ::godotCoroutineScopeSignalCallback4Args
+            is Signal5<*, *, *, *, *> -> ::godotCoroutineScopeSignalCallback5Args
+            is Signal6<*, *, *, *, *, *> -> ::godotCoroutineScopeSignalCallback6Args
+            is Signal7<*, *, *, *, *, *, *> -> ::godotCoroutineScopeSignalCallback7Args
+            is Signal8<*, *, *, *, *, *, *, *> -> ::godotCoroutineScopeSignalCallback8Args
+            else -> throw IllegalArgumentException("await can only handle signals with at most 8 arguments!")
+        }
         return Callable(
             target = owner,
-            methodName = when (this) {
-                is Signal0 -> ::godotCoroutineScopeSignalCallback0Args
-                is Signal1<*> -> ::godotCoroutineScopeSignalCallback1Args
-                is Signal2<*, *> -> ::godotCoroutineScopeSignalCallback2Args
-                is Signal3<*, *, *> -> ::godotCoroutineScopeSignalCallback3Args
-                is Signal4<*, *, *, *> -> ::godotCoroutineScopeSignalCallback4Args
-                is Signal5<*, *, *, *, *> -> ::godotCoroutineScopeSignalCallback5Args
-                is Signal6<*, *, *, *, *, *> -> ::godotCoroutineScopeSignalCallback6Args
-                is Signal7<*, *, *, *, *, *, *> -> ::godotCoroutineScopeSignalCallback7Args
-                is Signal8<*, *, *, *, *, *, *, *> -> ::godotCoroutineScopeSignalCallback8Args
-                else -> throw IllegalArgumentException("await can only handle signals with at most 8 arguments!")
-            }.name.asStringName()
-        ).bind(callableId)
+            methodName = function.name.camelToSnakeCase().asStringName()
+        ).bind(signalName)
     }
 
-    override fun godotCoroutineScopeSignalCallback0Args(callableId: String) {
+    override fun godotCoroutineScopeSignalCallback0Args(signalName: String) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback0Args.name.camelToSnakeCase(),
         )
     }
 
-    override fun godotCoroutineScopeSignalCallback1Args(arg0: Any?, callableId: String) {
+    override fun godotCoroutineScopeSignalCallback1Args(arg0: Any?, signalName: String) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
                 arg0,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback1Args.name.camelToSnakeCase(),
         )
     }
 
-    override fun godotCoroutineScopeSignalCallback2Args(arg0: Any?, arg1: Any?, callableId: String) {
+    override fun godotCoroutineScopeSignalCallback2Args(arg0: Any?, arg1: Any?, signalName: String) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
                 arg0,
                 arg1,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback2Args.name.camelToSnakeCase(),
         )
     }
 
-    override fun godotCoroutineScopeSignalCallback3Args(arg0: Any?, arg1: Any?, arg2: Any?, callableId: String) {
+    override fun godotCoroutineScopeSignalCallback3Args(arg0: Any?, arg1: Any?, arg2: Any?, signalName: String) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
                 arg0,
                 arg1,
                 arg2,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback3Args.name.camelToSnakeCase(),
         )
     }
 
@@ -214,7 +258,7 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         arg1: Any?,
         arg2: Any?,
         arg3: Any?,
-        callableId: String
+        signalName: String,
     ) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
@@ -223,7 +267,8 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
                 arg2,
                 arg3,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback4Args.name.camelToSnakeCase(),
         )
     }
 
@@ -233,7 +278,7 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         arg2: Any?,
         arg3: Any?,
         arg4: Any?,
-        callableId: String
+        signalName: String,
     ) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
@@ -243,7 +288,8 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
                 arg3,
                 arg4,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback5Args.name.camelToSnakeCase(),
         )
     }
 
@@ -254,7 +300,7 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         arg3: Any?,
         arg4: Any?,
         arg5: Any?,
-        callableId: String
+        signalName: String,
     ) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
@@ -265,7 +311,8 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
                 arg4,
                 arg5,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback6Args.name.camelToSnakeCase(),
         )
     }
 
@@ -277,7 +324,7 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         arg4: Any?,
         arg5: Any?,
         arg6: Any?,
-        callableId: String
+        signalName: String,
     ) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
@@ -289,7 +336,8 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
                 arg5,
                 arg6,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback7Args.name.camelToSnakeCase(),
         )
     }
 
@@ -302,7 +350,7 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
         arg5: Any?,
         arg6: Any?,
         arg7: Any?,
-        callableId: String
+        signalName: String,
     ) {
         godotCoroutineScopeSignalCallback(
             args = arrayOf(
@@ -315,15 +363,27 @@ class DefaultGodotCoroutineScope(private var owner: Object) : GodotCoroutineScop
                 arg6,
                 arg7,
             ),
-            callableId = callableId
+            signalName = signalName,
+            callableName = ::godotCoroutineScopeSignalCallback8Args.name.camelToSnakeCase(),
         )
     }
 
-    private fun godotCoroutineScopeSignalCallback(args: Array<Any?>, callableId: String) {
+    private fun godotCoroutineScopeSignalCallback(args: Array<Any?>, signalName: String, callableName: String) {
+        GD.print("Received signal emition")
         runBlocking {
-            continuationMapLock.withLock {
-                continuationMap.remove(callableId)
-            }?.resume(args)
+            val owner = owner?.get() ?: return@runBlocking
+            val key = "${owner.id}_${signalName}_${callableName}"
+            val awaitDataContainers = continuationMapLock.withLock {
+                continuationMap.remove(key)
+            } ?: return@runBlocking
+
+            awaitDataContainers.forEach { awaitDataContainer ->
+                awaitDataContainer.continuation.resume(args)
+
+                if (owner.isConnected(awaitDataContainer.signalName, awaitDataContainer.callable)) {
+                    owner.disconnect(awaitDataContainer.signalName, awaitDataContainer.callable)
+                }
+            }
         }
     }
 }

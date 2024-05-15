@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cef1l0plpml41"]
+
+[ext_resource type="Script" path="res://gdj/sample/coroutines/await/SignalAwaitSample.gdj" id="1_13osp"]
+
+[node name="CoroutineSignalAwaitExample" type="Node2D"]
+script = ExtResource("1_13osp")
