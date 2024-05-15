@@ -25,9 +25,9 @@ class SignalAwaitSample: Node(), GodotCoroutineScope by DefaultGodotCoroutineSco
     @RegisterFunction
     override fun _enterTree() {
         launch {
-            GD.print("Before await for ${::treeExiting.name} signal")
-            treeExiting.await()
-            GD.print("Node appears to be exiting the tree according to signal await")
+            GD.print("Before await for ${::ready.name} signal")
+            ready.await()
+            GD.print("Node appears to be ready according to signal await")
         }
         launch {
             GD.print("Before await for ${::customSignalWithArgs.name} signal")
@@ -52,11 +52,6 @@ class SignalAwaitSample: Node(), GodotCoroutineScope by DefaultGodotCoroutineSco
     @RegisterFunction
     override fun _ready() {
         GD.print("Node is ready! Any signal await messages should appear after this line!")
-    }
-
-    @RegisterFunction
-    override fun _process(delta: Double) {
-        resumeGodotContinuations()
         customSignalWithArgs.emit("some custom data string we emitted for testing")
         customSignalForMultiAwaitTest.emit()
     }

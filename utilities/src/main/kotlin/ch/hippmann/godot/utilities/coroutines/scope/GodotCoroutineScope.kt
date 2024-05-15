@@ -2,6 +2,7 @@ package ch.hippmann.godot.utilities.coroutines.scope
 
 import ch.hippmann.godot.utilities.coroutines.defaultDispatcher
 import ch.hippmann.godot.utilities.coroutines.mainDispatcher
+import godot.Node
 import godot.Object
 import godot.annotation.RegisterFunction
 import godot.core.Callable
@@ -34,9 +35,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 interface GodotCoroutineScope : CoroutineScope {
-    fun initSignalAwait(owner: Object)
-    fun Object.resumeGodotContinuations()
-    suspend fun Object.withGodotContext(block: () -> Unit)
+    fun initSignalAwait(owner: Node)
+    fun Node.resumeGodotContinuations()
+    suspend fun Node.withGodotContext(block: () -> Unit)
 
     suspend fun Signal.await(): Array<Any?>
 
@@ -100,11 +101,14 @@ interface GodotCoroutineScope : CoroutineScope {
         arg7: Any?,
         signalName: String,
     )
+
+    @RegisterFunction
+    fun godotCoroutineScopeTriggerContinuations()
 }
 
 @Suppress("unused")
 class DefaultGodotCoroutineScope : GodotCoroutineScope {
-    private var owner: WeakReference<Object>? = null
+    private var owner: WeakReference<Node>? = null
     private val uiContinuationsMutex = Mutex()
     private val uiContinuations: Queue<GodotContinuationWithBlock> = LinkedList()
 
@@ -122,25 +126,31 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
         }
     }
 
-    override fun initSignalAwait(owner: Object) {
+    override fun initSignalAwait(owner: Node) {
         this.owner = WeakReference(owner)
+        val callable = Callable(
+            target = owner,
+            methodName = ::godotCoroutineScopeTriggerContinuations.name.camelToSnakeCase().asStringName(),
+        )
+        owner.treeEntered.connect(callable)
+        owner.ready.connect(callable)
+        owner.treeExiting.connect(callable)
+        owner.treeExited.connect(callable)
     }
 
-    override fun Object.resumeGodotContinuations() {
+    override fun Node.resumeGodotContinuations() {
         runBlocking {
             uiContinuationsMutex.withLock {
                 while (uiContinuations.isNotEmpty()) {
                     val (continuation, block) = uiContinuations.remove()
-                    withContext(mainDispatcher()) {
-                        block()
-                    }
+                    block()
                     continuation.resume()
                 }
             }
         }
     }
 
-    override suspend fun Object.withGodotContext(block: () -> Unit) {
+    override suspend fun Node.withGodotContext(block: () -> Unit) {
         suspendCoroutine { continuation ->
             runBlocking {
                 addUiContinuation(continuation, block)
@@ -182,18 +192,28 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
                     }
                 }
 
-                owner.callDeferred(
-                    "connect".asStringName(),
-                    this@await.name,
-                    callable,
-                    Object.ConnectFlags.CONNECT_REFERENCE_COUNTED.id.toInt()
-                )
+                withContext(mainDispatcher()) {
+                    owner.withGodotContext {
+                        owner.connect(
+                            this@await.name,
+                            callable,
+                            Object.ConnectFlags.CONNECT_REFERENCE_COUNTED.id,
+                        )
+                    }
+                }
+
+//                owner.callDeferred(
+//                    "connect".asStringName(),
+//                    this@await.name,
+//                    callable,
+//                    Object.ConnectFlags.CONNECT_REFERENCE_COUNTED.id.toInt()
+//                )
                 GD.print("Did connect")
             }
         }
     }
 
-    private fun Signal.provideCallable(owner: Object, signalName: String): Callable {
+    private fun Signal.provideCallable(owner: Node, signalName: String): Callable {
         val function = when (this) {
             is Signal0 -> ::godotCoroutineScopeSignalCallback0Args
             is Signal1<*> -> ::godotCoroutineScopeSignalCallback1Args
@@ -366,6 +386,10 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
             signalName = signalName,
             callableName = ::godotCoroutineScopeSignalCallback8Args.name.camelToSnakeCase(),
         )
+    }
+
+    override fun godotCoroutineScopeTriggerContinuations() {
+        owner?.get()?.resumeGodotContinuations()
     }
 
     private fun godotCoroutineScopeSignalCallback(args: Array<Any?>, signalName: String, callableName: String) {

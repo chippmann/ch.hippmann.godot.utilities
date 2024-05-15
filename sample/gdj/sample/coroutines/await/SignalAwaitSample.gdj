@@ -23,7 +23,6 @@ properties = [
 functions = [
     _enter_tree,
 	_ready,
-	_process,
 	godot_coroutine_scope_signal_callback0_args,
 	godot_coroutine_scope_signal_callback1_args,
 	godot_coroutine_scope_signal_callback2_args,
@@ -32,5 +31,6 @@ functions = [
 	godot_coroutine_scope_signal_callback5_args,
 	godot_coroutine_scope_signal_callback6_args,
 	godot_coroutine_scope_signal_callback7_args,
-	godot_coroutine_scope_signal_callback8_args
+	godot_coroutine_scope_signal_callback8_args,
+	godot_coroutine_scope_trigger_continuations
 ]
