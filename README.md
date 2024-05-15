@@ -92,7 +92,7 @@ launch(mainDispatcher()) {
 ```
 
 ### Godot coroutine scope
-Allows you to launch kotlin coroutines from within a node. In the case of ui nodes, it also provides you the means to run continuations in the context of the ui (you can freely choose where, by calling `resumeGodotContinuations`).
+Allows you to launch kotlin coroutines from within a node. Iit also provides you the means to run continuations in the context of the node (you can freely choose where, by calling `resumeGodotContinuations`).
 
 **Note:** It is very important that if you use `withGodotContext` you also have a `resumeGodotContinuations` call in your node! Otherwise all coroutines which use `withGodotContext` will block indefinitely and cause memory leaks for good measure! 
 
