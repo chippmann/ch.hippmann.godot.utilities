@@ -141,7 +141,7 @@ class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() 
 
       withGodotContext { 
         // the code here runs the next time you call `resumeGodotContinuations`. Which in this example, is the next time `_process` is called
-        println("UICONTEXT: Setting label")
+        println("GODOT_CONTEXT: Setting label")
         label.text = resultOfWork
       }
       delay(100)
