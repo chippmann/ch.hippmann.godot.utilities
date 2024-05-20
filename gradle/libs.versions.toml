@@ -1,5 +1,5 @@
 [versions]
-godot-kotlin-jvm-utilities = "0.0.2"
+godot-kotlin-jvm-utilities = "0.0.3"
 kotlin = "1.9.23"
 jvmToolchainVersion = "17"
 
