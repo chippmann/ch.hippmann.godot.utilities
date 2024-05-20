@@ -12,6 +12,7 @@ This is a small library providing common utilities which might be useful in many
     - [Coroutine dispatchers](#coroutine-dispatchers)
     - [Godot coroutine scope](#godot-coroutine-scope)
     - [Await signals](#await-signals)
+    - [Signal callback connection](#signal-callback-connection)
 
 ## Adding to your project
 Add the library as a dependency to your project. As it is published to maven central, you should also make sure that you have maven central set up as a repository:
@@ -156,6 +157,9 @@ Allows you to await signal emitions inside coroutines.
 
 > **Note:** Necessitates the setup of [Coroutine dispatchers](#coroutine-dispatchers) and implicitly applies [GodotCoroutineScope](#godot-coroutine-scope)!
 
+> **Note:** This functionality only exists temporarily until [GH-501](https://github.com/utopia-rise/godot-kotlin-jvm/issues/501) is implemented  
+> Once that's the case though, migration should be very simple
+
 You must call `initSignalAwait` before any call to the `await` function!
 
 Example:
@@ -181,5 +185,44 @@ class SignalAwaitSample: Node(), SignalAwaitable by SignalAwaiter() {
     override fun _ready() {
         GD.print("Node is ready! Any signal await messages should appear after this line!")
     }
+}
+```
+
+### Signal callback connection
+Allows you to connect to signals using lambdas.
+
+> **Note:** This functionality only exists temporarily until this feature is officially introduced in Godot Kotlin/JVM!  
+> Once that's the case though, migration should be very simple
+
+You must call `initSignalConnectable` before any call to the `connect` function which receives a lambda!
+
+The return type of these new `connect` functions is a custom sealed class which in the success case returns a id which identifies a given callable. This id can be used to disconnect specific lambdas if needed using the corresponding `disconnect` function. The `disconnectAll` function can be used to disconnect all connected lambdas at once.
+
+Example:
+```kotlin
+@RegisterClass
+class SignalConnectorSample : Node(), SignalConnectable by SignalConnector() {
+  @RegisterSignal
+  val customSignalWithArgs by signal<String>("someData")
+
+  init {
+    initSignalConnectable()
+  }
+
+  @RegisterFunction
+  override fun _enterTree() {
+    ready.connect {
+      GD.print("${SignalConnectorSample::class.simpleName} is ready")
+    }
+    customSignalWithArgs.connect(Object.ConnectFlags.CONNECT_ONE_SHOT.id) { arg ->
+      GD.print("Received signal emition from ${::customSignalWithArgs.name} with arg: $arg. This signal should only be received once!")
+    }
+  }
+
+  @RegisterFunction
+  override fun _ready() {
+    customSignalWithArgs.emit("Should be received")
+    customSignalWithArgs.emit("Should NOT be received!!!")
+  }
 }
 ```

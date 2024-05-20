@@ -1,0 +1,37 @@
+package sample.signal
+
+import ch.hippmann.godot.utilities.signal.SignalConnectable
+import ch.hippmann.godot.utilities.signal.SignalConnector
+import godot.Node
+import godot.Object
+import godot.annotation.RegisterClass
+import godot.annotation.RegisterFunction
+import godot.annotation.RegisterSignal
+import godot.global.GD
+import godot.signals.signal
+
+@RegisterClass
+class SignalConnectorSample : Node(), SignalConnectable by SignalConnector() {
+    @RegisterSignal
+    val customSignalWithArgs by signal<String>("someData")
+
+    init {
+        initSignalConnectable()
+    }
+
+    @RegisterFunction
+    override fun _enterTree() {
+        ready.connect {
+            GD.print("${SignalConnectorSample::class.simpleName} is ready")
+        }
+        customSignalWithArgs.connect(Object.ConnectFlags.CONNECT_ONE_SHOT.id) { arg ->
+            GD.print("Received signal emition from ${::customSignalWithArgs.name} with arg: $arg. This signal should only be received once!")
+        }
+    }
+
+    @RegisterFunction
+    override fun _ready() {
+        customSignalWithArgs.emit("Should be received")
+        customSignalWithArgs.emit("Should NOT be received!!!")
+    }
+}

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvl8y81733pin"]
+
+[ext_resource type="Script" path="res://gdj/sample/signal/SignalConnectorSample.gdj" id="1_xyxsf"]
+
+[node name="SignalConnectorSample" type="Node"]
+script = ExtResource("1_xyxsf")

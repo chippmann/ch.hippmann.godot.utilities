@@ -1,0 +1,33 @@
+// THIS FILE IS GENERATED! DO NOT EDIT OR DELETE IT. EDIT OR DELETE THE ASSOCIATED SOURCE CODE FILE INSTEAD
+// Note: You can however freely move this file inside your godot project if you want. Keep in mind however, that if you rename the originating source code file, this file will be deleted and regenerated as a new file instead of being updated! Other modifications to the source file however, will result in this file being updated.
+
+registeredName = SignalConnectorSample
+fqName = sample.signal.SignalConnectorSample
+relativeSourcePath = src/main/kotlin/sample/signal/SignalConnectorSample.kt
+baseType = Node
+supertypes = [
+    godot.Node,
+	ch.hippmann.godot.utilities.signal.SignalConnectable,
+	godot.Object,
+	godot.core.KtObject,
+	kotlin.Any
+]
+signals = [
+    custom_signal_with_args
+]
+properties = [
+    
+]
+functions = [
+    _enter_tree,
+	_ready,
+	signal_connectable_signal_callback0_args,
+	signal_connectable_signal_callback1_args,
+	signal_connectable_signal_callback2_args,
+	signal_connectable_signal_callback3_args,
+	signal_connectable_signal_callback4_args,
+	signal_connectable_signal_callback5_args,
+	signal_connectable_signal_callback6_args,
+	signal_connectable_signal_callback7_args,
+	signal_connectable_signal_callback8_args
+]
