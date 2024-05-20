@@ -135,7 +135,7 @@ class SignalConnector : SignalConnectable {
         )
     }
 
-    fun <NODE : Node> Signal.disconnect(callbackHandle: String) {
+    fun Signal.disconnect(callbackHandle: String) {
         val signalName = this.name.toString()
         val isNoConnectionLeft = runBlocking {
             callbackMapLock.withLock {
@@ -151,7 +151,7 @@ class SignalConnector : SignalConnectable {
         }
     }
 
-    fun <NODE : Node> Signal.disconnectAll() {
+    fun Signal.disconnectAll() {
         val signalName = this.name.toString()
         runBlocking {
             callbackMapLock.withLock {
