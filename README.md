@@ -205,7 +205,8 @@ class SignalConnectorSample : Node(), SignalConnectable by SignalConnector() {
   @RegisterSignal
   val customSignalWithArgs by signal<String>("someData")
 
-  init {
+  init { 
+    // needs to be invoked before any call to the new connect or disconnect methods!
     initSignalConnectable()
   }
 
