@@ -27,6 +27,15 @@ dependencies {
     // if you plan on using the coroutine helpers; don't forget to add the kotlinx coroutines dependency:
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<version>")
 }
+
+// this project uses context receivers. Until they are readily available in kotlin, you'll need to opt in to be able to use this library!
+tasks {
+  withType<KotlinCompile> {
+    kotlinOptions {
+      this.freeCompilerArgs += "-Xcontext-receivers"
+    }
+  }
+}
 ```
 
 ## Utilities and their usage
@@ -46,26 +55,26 @@ Logging abstraction to print logs more concisely:
 val someException: Throwable = fromSomewhere
 
 // Prints:
-// DEBUG: A log message explaining why an exception occurred 
+// 2024-07-26T11:16:34.424 [main] DEBUG ::HelloWorld A log message explaining why an exception occurred 
 // stacktrace printed
-debug(someException) {
+Log.debug(someException) {
     "A log message explaining why an exception occurred"
 }
 
 // Prints:
-// DEBUG: A log message explaining why an exception occurred 
+// 2024-07-26T11:16:34.424 [main] DEBUG ::HelloWorld A log message explaining why an exception occurred 
 // stacktrace printed
-debug(someException, "A log message explaining why an exception occurred")
+Log.debug(someException, "A log message explaining why an exception occurred")
 
 // Prints:
-// DEBUG: Just a log message
-debug {
+// 2024-07-26T11:16:34.424 [main] DEBUG ::HelloWorld Just a log message
+Log.debug {
     "Just a log message"
 }
 
 // Prints:
-// DEBUG: Just a log message
-debug("Just a log message")
+// 2024-07-26T11:16:34.424 [main] DEBUG ::HelloWorld Just a log message
+Log.debug("Just a log message")
 ```
 
 The above examples are present with the following severities:
