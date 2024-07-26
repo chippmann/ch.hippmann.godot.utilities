@@ -3,8 +3,7 @@ package ch.hippmann.godot.utilities.coroutines.await
 import ch.hippmann.godot.utilities.coroutines.mainDispatcher
 import ch.hippmann.godot.utilities.coroutines.scope.DefaultGodotCoroutineScope
 import ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope
-import ch.hippmann.godot.utilities.logging.debug
-import ch.hippmann.godot.utilities.logging.err
+import ch.hippmann.godot.utilities.logging.Log
 import godot.Node
 import godot.OS
 import godot.Object
@@ -65,7 +64,7 @@ class SignalAwaiter(
             if (OS.isDebugBuild()) {
                 throw IllegalStateException("There is not owner set! Did you forget to call initSignalAwait in the constructor?")
             } else {
-                err { "There is not owner set! Did you forget to call initSignalAwait in the constructor? Returning empty array immediately and will not await anything" }
+                Log.err { "There is not owner set! Did you forget to call initSignalAwait in the constructor? Returning empty array immediately and will not await anything" }
             }
             return arrayOf()
         }
@@ -145,14 +144,14 @@ class SignalAwaiter(
         debugLog { "Received signal emition from signal: $signalName for callable: $callableName. Provided args: $args" }
         runBlocking {
             val owner = owner?.get() ?: run {
-                err { "There is not owner present anymore! No op" }
+                Log.err { "There is not owner present anymore! No op" }
                 return@runBlocking
             }
             val key = assembleKey(owner, signalName, callableName)
             val awaitDataContainers = continuationMapLock.withLock {
                 continuationMap.remove(key)
             } ?: run {
-                err { "No await data found for key $key" }
+                Log.err { "No await data found for key $key" }
                 return@runBlocking
             }
 
@@ -170,7 +169,7 @@ class SignalAwaiter(
 
     private inline fun debugLog(message: () -> String) {
         if (printDebug) {
-            debug(message = message)
+            Log.debug(message = message)
         }
     }
 

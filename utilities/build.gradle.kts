@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.godot.kotlin.jvm)
@@ -18,6 +20,7 @@ godot {
 dependencies {
     compileOnly(libs.godot.kotlin.jvm)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.datetime)
 }
 
 kotlin {
@@ -61,6 +64,12 @@ publishConfig {
 }
 
 tasks {
+    withType<KotlinCompile> {
+        kotlinOptions {
+            this.freeCompilerArgs += "-Xcontext-receivers"
+        }
+    }
+
     // disable shadow jar creation to be able to publish (otherwise we have a jar conflict. It's not needed anyways. Ideally this should be fixed in Godot Kotlin directly)
     shadowJar.configure {
         enabled = false
