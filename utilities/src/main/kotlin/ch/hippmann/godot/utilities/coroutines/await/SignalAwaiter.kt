@@ -8,19 +8,19 @@ import godot.Node
 import godot.OS
 import godot.Object
 import godot.core.Callable
+import godot.core.NativeCallable
+import godot.core.Signal
+import godot.core.Signal0
+import godot.core.Signal1
+import godot.core.Signal2
+import godot.core.Signal3
+import godot.core.Signal4
+import godot.core.Signal5
+import godot.core.Signal6
+import godot.core.Signal7
+import godot.core.Signal8
 import godot.core.StringName
-import godot.core.asStringName
-import godot.signals.Signal
-import godot.signals.Signal0
-import godot.signals.Signal1
-import godot.signals.Signal2
-import godot.signals.Signal3
-import godot.signals.Signal4
-import godot.signals.Signal5
-import godot.signals.Signal6
-import godot.signals.Signal7
-import godot.signals.Signal8
-import godot.util.camelToSnakeCase
+import godot.core.toGodotName
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,23 +32,25 @@ import kotlin.coroutines.suspendCoroutine
 
 private data class AwaitDataContainer(
     val continuation: Continuation<Array<Any?>>,
-    val callable: Callable,
+    val callable: NativeCallable,
     val signalName: StringName,
 ) {
-    fun assembleKey(owner: Node): String = "${owner.id}_${signalName}_${callable.getMethod()}"
+    fun assembleKey(owner: Node): String = "${owner.objectID}_${signalName}_${callable.getMethod()}"
 }
 
 @Suppress("unused")
+@Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
 class SignalAwaiter(
     private val printDebug: Boolean = OS.isDebugBuild(),
 ) : SignalAwaitable, GodotCoroutineScope by DefaultGodotCoroutineScope() {
     private var owner: WeakReference<Node>? = null
 
+    @Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
     override fun <T : Node> T.initSignalAwait() {
         this@SignalAwaiter.owner = WeakReference(this)
         val callable = Callable(
             target = this,
-            methodName = ::signalAwaitableTriggerContinuations.name.camelToSnakeCase().asStringName(),
+            methodName = ::signalAwaitableTriggerContinuations.name.toGodotName(),
         )
         this.treeEntered.connect(callable)
         this.ready.connect(callable)
@@ -59,6 +61,7 @@ class SignalAwaiter(
     private val continuationMapLock = Mutex()
     private val continuationMap: MutableMap<String, List<AwaitDataContainer>> = mutableMapOf()
 
+    @Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
     override suspend fun Signal.await(): Array<Any?> {
         val owner = this@SignalAwaiter.owner?.get() ?: run {
             if (OS.isDebugBuild()) {
@@ -121,7 +124,7 @@ class SignalAwaiter(
         }
     }
 
-    private fun Signal.provideCallable(owner: Node, signalName: String): Callable {
+    private fun Signal.provideCallable(owner: Node, signalName: String): NativeCallable {
         val function = when (this) {
             is Signal0 -> ::signalAwaitableSignalCallback0Args
             is Signal1<*> -> ::signalAwaitableSignalCallback1Args
@@ -136,7 +139,7 @@ class SignalAwaiter(
         }
         return Callable(
             target = owner,
-            methodName = function.name.camelToSnakeCase().asStringName()
+            methodName = function.name.toGodotName()
         ).bind(signalName)
     }
 
@@ -174,14 +177,14 @@ class SignalAwaiter(
     }
 
     private fun assembleKey(owner: Node, signalName: String, callableName: String) =
-        "${owner.id}_${signalName}_${callableName}"
+        "${owner.objectID}_${signalName}_${callableName}"
 
     // START: await callback registered functions
     override fun signalAwaitableSignalCallback0Args(signalName: String) {
         signalAwaitableSignalCallback(
             args = arrayOf(),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback0Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback0Args.name.toGodotName().toString(),
         )
     }
 
@@ -189,7 +192,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback1Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback1Args.name.toGodotName().toString(),
         )
     }
 
@@ -197,7 +200,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback2Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback2Args.name.toGodotName().toString(),
         )
     }
 
@@ -205,7 +208,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1, arg2),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback3Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback3Args.name.toGodotName().toString(),
         )
     }
 
@@ -219,7 +222,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1, arg2, arg3),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback4Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback4Args.name.toGodotName().toString(),
         )
     }
 
@@ -234,7 +237,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1, arg2, arg3, arg4),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback5Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback5Args.name.toGodotName().toString(),
         )
     }
 
@@ -250,7 +253,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1, arg2, arg3, arg4, arg5),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback6Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback6Args.name.toGodotName().toString(),
         )
     }
 
@@ -267,7 +270,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1, arg2, arg3, arg4, arg5, arg6),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback7Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback7Args.name.toGodotName().toString(),
         )
     }
 
@@ -285,7 +288,7 @@ class SignalAwaiter(
         signalAwaitableSignalCallback(
             args = arrayOf(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7),
             signalName = signalName,
-            callableName = ::signalAwaitableSignalCallback8Args.name.camelToSnakeCase(),
+            callableName = ::signalAwaitableSignalCallback8Args.name.toGodotName().toString(),
         )
     }
 

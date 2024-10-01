@@ -12,6 +12,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("unused")
+@Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
 class DefaultGodotCoroutineScope : GodotCoroutineScope {
     private val godotContinuationsMutex = Mutex()
     private val godotContinuations: Queue<GodotContinuationWithBlock> = LinkedList()
@@ -30,6 +31,7 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
         }
     }
 
+    @Deprecated(message = "This is no longer supported! Use awaitDeferred from godot-coroutine-library instead!")
     override fun Node.resumeGodotContinuations() {
         runBlocking {
             godotContinuationsMutex.withLock {
@@ -42,6 +44,7 @@ class DefaultGodotCoroutineScope : GodotCoroutineScope {
         }
     }
 
+    @Deprecated(message = "This is no longer supported! Use awaitDeferred from godot-coroutine-library instead!")
     override suspend fun Node.withGodotContext(block: () -> Unit) {
         suspendCoroutine { continuation ->
             runBlocking {

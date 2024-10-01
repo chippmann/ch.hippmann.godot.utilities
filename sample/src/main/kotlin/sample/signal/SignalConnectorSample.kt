@@ -7,13 +7,13 @@ import godot.Object
 import godot.annotation.RegisterClass
 import godot.annotation.RegisterFunction
 import godot.annotation.RegisterSignal
+import godot.core.signal1
 import godot.global.GD
-import godot.signals.signal
 
 @RegisterClass
 class SignalConnectorSample : Node(), SignalConnectable by SignalConnector() {
     @RegisterSignal
-    val customSignalWithArgs by signal<String>("someData")
+    val customSignalWithArgs by signal1<String>("someData")
 
     init {
         initSignalConnectable()
