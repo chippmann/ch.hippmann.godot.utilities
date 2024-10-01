@@ -6,8 +6,9 @@ import godot.Node
 import godot.annotation.RegisterClass
 import godot.annotation.RegisterFunction
 import godot.annotation.RegisterSignal
+import godot.core.signal0
+import godot.core.signal1
 import godot.global.GD
-import godot.signals.signal
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -15,8 +16,8 @@ import kotlin.time.Duration.Companion.seconds
 
 @RegisterClass
 class SignalAwaitSample: Node(), SignalAwaitable by SignalAwaiter() {
-    @RegisterSignal val customSignalWithArgs by signal<String>("someData")
-    @RegisterSignal val customSignalForMultiAwaitTest by signal()
+    @RegisterSignal val customSignalWithArgs by signal1<String>("someData")
+    @RegisterSignal val customSignalForMultiAwaitTest by signal0()
 
     init {
         initSignalAwait()

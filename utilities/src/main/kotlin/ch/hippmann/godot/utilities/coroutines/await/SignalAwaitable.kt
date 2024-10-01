@@ -3,11 +3,14 @@ package ch.hippmann.godot.utilities.coroutines.await
 import ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope
 import godot.Node
 import godot.annotation.RegisterFunction
-import godot.signals.Signal
+import godot.core.Signal
 
+@Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
 interface SignalAwaitable: GodotCoroutineScope {
+    @Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
     fun <T: Node> T.initSignalAwait()
 
+    @Deprecated(message = "This functionality is now part of the official godot-coroutine-library! See: https://godot-kotl.in/en/stable/user-guide/coroutines/")
     suspend fun Signal.await(): Array<Any?>
 
     @RegisterFunction

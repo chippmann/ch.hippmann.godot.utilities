@@ -9,10 +9,10 @@ This is a small library providing common utilities which might be useful in many
 - [Utilities and their usage](#utilities-and-their-usage)
     - [Autoload](#autoload)
     - [Logging](#logging)
-    - [Coroutine dispatchers](#coroutine-dispatchers)
-    - [Godot coroutine scope](#godot-coroutine-scope)
-    - [Await signals](#await-signals)
-    - [Signal callback connection](#signal-callback-connection)
+    - [[DEPRECATED] Coroutine dispatchers](#coroutine-dispatchers)
+    - [[DEPRECATED] Godot coroutine scope](#godot-coroutine-scope)
+    - [[DEPRECATED] Await signals](#await-signals)
+    - [[DEPRECATED] Signal callback connection](#signal-callback-connection)
 
 ## Adding to your project
 Add the library as a dependency to your project. As it is published to maven central, you should also make sure that you have maven central set up as a repository:
@@ -26,15 +26,6 @@ dependencies {
 
     // if you plan on using the coroutine helpers; don't forget to add the kotlinx coroutines dependency:
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<version>")
-}
-
-// this project uses context receivers. Until they are readily available in kotlin, you'll need to opt in to be able to use this library!
-tasks {
-  withType<KotlinCompile> {
-    kotlinOptions {
-      this.freeCompilerArgs += "-Xcontext-receivers"
-    }
-  }
 }
 ```
 
@@ -83,7 +74,9 @@ The above examples are present with the following severities:
 - warn
 - err
 
-### Coroutine dispatchers
+### [DEPRECATED] Coroutine dispatchers
+> :warning: **Note:** This functionality is deprecated! Switch to the official [godot-coroutine-library](https://godot-kotl.in/en/stable/user-guide/coroutines/)
+
 Mainly provides a `Dispatchers.Main` and abstracts all dispatcher usage so they are accessed the same:
 
 This library provides an autoload singleton you need to add to your project (remember to have it higher in the order if you use dispatchers in your own autoload singletons, so it's initialised before your autoloads!). You can find the registration file (`gdj`) in the `dependencies` directory in the `gdj` output directory of your project after you've built your project.
@@ -101,7 +94,9 @@ launch(mainDispatcher()) {
 }
 ```
 
-### Godot coroutine scope
+### [DEPRECATED] Godot coroutine scope
+> :warning: **Note:** This functionality is deprecated! Switch to the official [godot-coroutine-library](https://godot-kotl.in/en/stable/user-guide/coroutines/)
+
 Allows you to launch kotlin coroutines from within a node. Iit also provides you the means to run continuations in the context of the node (you can freely choose where, by calling `resumeGodotContinuations`).
 
 **Note:** It is very important that if you use `withGodotContext` you also have a `resumeGodotContinuations` call in your node! Otherwise all coroutines which use `withGodotContext` will block indefinitely and cause memory leaks for good measure! 
@@ -161,7 +156,9 @@ class TestNode : Control(), GodotCoroutineScope by DefaultGodotCoroutineScope() 
 }
 ```
 
-### Await signals
+### [DEPRECATED] Await signals
+> :warning: **Note:** This functionality is deprecated! Switch to the official [godot-coroutine-library](https://godot-kotl.in/en/stable/user-guide/coroutines/)
+
 Allows you to await signal emitions inside coroutines.
 
 > **Note:** Necessitates the setup of [Coroutine dispatchers](#coroutine-dispatchers) and implicitly applies [GodotCoroutineScope](#godot-coroutine-scope)!
@@ -197,7 +194,9 @@ class SignalAwaitSample: Node(), SignalAwaitable by SignalAwaiter() {
 }
 ```
 
-### Signal callback connection
+### [DEPRECATED] Signal callback connection
+> :warning: **Note:** This functionality is deprecated! This functionality is now officially supported.
+
 Allows you to connect to signals using lambdas.
 
 > **Note:** This functionality only exists temporarily until this feature is officially introduced in Godot Kotlin/JVM!  

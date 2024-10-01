@@ -2,13 +2,9 @@ package ch.hippmann.godot.utilities.logging
 
 import ch.hippmann.godot.utilities.datetime.localNow
 import ch.hippmann.godot.utilities.logging.Log.peerIdForLogging
-import godot.OS
 import godot.global.GD
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
-
-@PublishedApi
-internal val isDebugBuild by lazy { OS.isDebugBuild() }
 
 enum class LogLevel {
     TRACE,
@@ -20,12 +16,6 @@ enum class LogLevel {
 
 object Log {
     var peerIdForLogging: Int? = null
-
-    var logLevel: LogLevel = if (OS.isDebugBuild()) {
-        LogLevel.DEBUG
-    } else {
-        LogLevel.INFO
-    }
 
     context(T) inline fun <reified T> trace(t: Throwable? = null, message: () -> String) = trace(message(), t)
     context(T) inline fun <reified T> trace(message: String, t: Throwable? = null) = __log<T>(LogLevel.TRACE, message, t)
@@ -77,7 +67,7 @@ internal inline fun <reified T> __log(level: LogLevel, message: String, t: Throw
 
     when(level) {
         LogLevel.ERROR -> GD.printErr(formattedMessage)
-        LogLevel.WARN -> GD.print(formattedMessage)
+        LogLevel.WARN -> GD.pushWarning(formattedMessage)
         LogLevel.INFO -> GD.print(formattedMessage)
         LogLevel.DEBUG -> GD.print(formattedMessage)
         LogLevel.TRACE -> GD.print(formattedMessage)
