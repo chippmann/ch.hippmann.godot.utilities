@@ -2,8 +2,8 @@ package sample.signal
 
 import ch.hippmann.godot.utilities.signal.SignalConnectable
 import ch.hippmann.godot.utilities.signal.SignalConnector
-import godot.Node
-import godot.Object
+import godot.api.Node
+import godot.api.Object
 import godot.annotation.RegisterClass
 import godot.annotation.RegisterFunction
 import godot.annotation.RegisterSignal
@@ -12,8 +12,8 @@ import godot.global.GD
 
 @RegisterClass
 class SignalConnectorSample : Node(), SignalConnectable by SignalConnector() {
-    @RegisterSignal
-    val customSignalWithArgs by signal1<String>("someData")
+    @RegisterSignal("someData")
+    val customSignalWithArgs by signal1<String>()
 
     init {
         initSignalConnectable()

@@ -1,6 +1,6 @@
 package ch.hippmann.godot.utilities.coroutines
 
-import godot.Node
+import godot.api.Node
 import godot.annotation.RegisterClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.runBlocking

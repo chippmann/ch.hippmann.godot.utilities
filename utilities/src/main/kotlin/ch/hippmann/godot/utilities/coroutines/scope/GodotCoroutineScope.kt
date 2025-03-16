@@ -1,6 +1,6 @@
 package ch.hippmann.godot.utilities.coroutines.scope
 
-import godot.Node
+import godot.api.Node
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume

@@ -1,7 +1,7 @@
 package ch.hippmann.godot.utilities.coroutines.scope
 
 import ch.hippmann.godot.utilities.coroutines.defaultDispatcher
-import godot.Node
+import godot.api.Node
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.runBlocking

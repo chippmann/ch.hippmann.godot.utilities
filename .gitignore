@@ -41,3 +41,5 @@ bin/
 ### Mac OS ###
 .DS_Store
 /sample/.godot/
+/sample/jvm/
+/utilities/jvm/

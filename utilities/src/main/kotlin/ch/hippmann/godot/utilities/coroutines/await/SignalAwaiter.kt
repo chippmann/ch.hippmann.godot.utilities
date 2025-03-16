@@ -4,9 +4,9 @@ import ch.hippmann.godot.utilities.coroutines.mainDispatcher
 import ch.hippmann.godot.utilities.coroutines.scope.DefaultGodotCoroutineScope
 import ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope
 import ch.hippmann.godot.utilities.logging.Log
-import godot.Node
-import godot.OS
-import godot.Object
+import godot.api.Node
+import godot.api.OS
+import godot.api.Object
 import godot.core.Callable
 import godot.core.NativeCallable
 import godot.core.Signal

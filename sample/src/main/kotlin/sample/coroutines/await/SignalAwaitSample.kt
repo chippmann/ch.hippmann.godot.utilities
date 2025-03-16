@@ -2,7 +2,7 @@ package sample.coroutines.await
 
 import ch.hippmann.godot.utilities.coroutines.await.SignalAwaitable
 import ch.hippmann.godot.utilities.coroutines.await.SignalAwaiter
-import godot.Node
+import godot.api.Node
 import godot.annotation.RegisterClass
 import godot.annotation.RegisterFunction
 import godot.annotation.RegisterSignal
@@ -16,7 +16,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @RegisterClass
 class SignalAwaitSample: Node(), SignalAwaitable by SignalAwaiter() {
-    @RegisterSignal val customSignalWithArgs by signal1<String>("someData")
+    @RegisterSignal("someData") val customSignalWithArgs by signal1<String>()
     @RegisterSignal val customSignalForMultiAwaitTest by signal0()
 
     init {

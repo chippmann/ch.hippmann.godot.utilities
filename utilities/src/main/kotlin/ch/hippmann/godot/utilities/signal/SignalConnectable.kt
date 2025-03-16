@@ -1,8 +1,8 @@
 package ch.hippmann.godot.utilities.signal
 
-import godot.Error
-import godot.Node
 import godot.annotation.RegisterFunction
+import godot.api.Node
+import godot.core.Error
 import godot.core.Signal0
 import godot.core.Signal1
 import godot.core.Signal2

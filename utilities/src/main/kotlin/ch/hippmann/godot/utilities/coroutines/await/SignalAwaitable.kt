@@ -1,7 +1,7 @@
 package ch.hippmann.godot.utilities.coroutines.await
 
 import ch.hippmann.godot.utilities.coroutines.scope.GodotCoroutineScope
-import godot.Node
+import godot.api.Node
 import godot.annotation.RegisterFunction
 import godot.core.Signal
 

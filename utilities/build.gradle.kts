@@ -16,7 +16,7 @@ godot {
 }
 
 dependencies {
-    compileOnly(libs.godot.kotlin.jvm)
+    compileOnly(libs.godot.kotlin.jvm.api)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.datetime)
 }

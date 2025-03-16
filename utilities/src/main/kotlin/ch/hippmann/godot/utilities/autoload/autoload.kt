@@ -1,7 +1,7 @@
 package ch.hippmann.godot.utilities.autoload
 
 import ch.hippmann.godot.utilities.data.WeakRefMap
-import godot.Node
+import godot.api.Node
 import godot.core.asNodePath
 
 
