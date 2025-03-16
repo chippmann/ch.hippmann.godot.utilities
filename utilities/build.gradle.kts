@@ -66,6 +66,9 @@ tasks {
     shadowJar.configure {
         enabled = false
     }
+    afterEvaluate {
+        getByName("copyJars").dependsOn("sourcesJar")
+    }
 }
 
 fun Project.propOrEnv(name: String): String? {
