@@ -67,7 +67,7 @@ tasks {
         enabled = false
     }
     afterEvaluate {
-        getByName("copyJars").dependsOn("sourcesJar")
+        getByName("copyJars").dependsOn(getByName("sourcesJar"))
     }
 }
 
