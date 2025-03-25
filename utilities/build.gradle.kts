@@ -73,9 +73,12 @@ tasks {
     }
 
     afterEvaluate {
-        findByName("copyJars")?.dependsOn(
+        val dependencies = listOfNotNull(
             getByName("sourcesJar"),
-            getByName("mavenPlainJavadocJar"),
+            findByName("mavenPlainJavadocJar"),
+        )
+        findByName("copyJars")?.dependsOn(
+            *dependencies.toTypedArray(),
         )
     }
 }
