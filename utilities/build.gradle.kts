@@ -73,7 +73,10 @@ tasks {
     }
 
     afterEvaluate {
-        findByName("copyJars")?.dependsOn(getByName("sourcesJar"))
+        findByName("copyJars")?.dependsOn(
+            getByName("sourcesJar"),
+            getByName("mavenPlainJavadocJar"),
+        )
     }
 }
 
