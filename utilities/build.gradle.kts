@@ -25,6 +25,11 @@ kotlin {
     jvmToolchain(libs.versions.jvmToolchainVersion.get().toInt())
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 val projectName = name
 val baseUrl = "github.com/chippmann/ch.hippmann.godot.utilities"
 publishConfig {
