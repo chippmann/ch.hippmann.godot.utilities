@@ -12,7 +12,7 @@ subprojects {
 
 val baseUrl = "github.com/chippmann/ch.hippmann.godot.utilities"
 tasks {
-    val generateChangelog by creating {
+    val generateChangelog by registering {
         group = "changelog"
 
         doLast {
