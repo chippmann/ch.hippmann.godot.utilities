@@ -40,4 +40,4 @@ jobs:
       - name: Publish
         shell: sh
         run: |
-          ./gradlew publishToMavenCentral
+          ./gradlew publish

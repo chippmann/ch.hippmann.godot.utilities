@@ -25,11 +25,6 @@ kotlin {
     jvmToolchain(libs.versions.jvmToolchainVersion.get().toInt())
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 val projectName = name
 val baseUrl = "github.com/chippmann/ch.hippmann.godot.utilities"
 publishConfig {
@@ -73,13 +68,7 @@ tasks {
     }
 
     afterEvaluate {
-        val dependencies = listOfNotNull(
-            getByName("sourcesJar"),
-            findByName("mavenPlainJavadocJar"),
-        )
-        findByName("copyJars")?.dependsOn(
-            *dependencies.toTypedArray(),
-        )
+        findByName("copyJars")?.dependsOn(withType(Sign::class.java))
     }
 }
 
