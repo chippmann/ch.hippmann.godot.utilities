@@ -2,7 +2,6 @@ package publish
 
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.MavenPublishPlugin
-import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -46,7 +45,7 @@ class PublishToMavenCentralPlugin : Plugin<Project> {
 
                 evaluatedProject.pluginManager.apply(MavenPublishPlugin::class.java)
                 evaluatedProject.extensions.getByType(MavenPublishBaseExtension::class.java).apply {
-                    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+                    publishToMavenCentral()
                     signAllPublications()
                 }
             } else {
