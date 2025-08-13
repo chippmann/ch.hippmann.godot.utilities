@@ -115,7 +115,7 @@ class SignalAwaiter(
                         owner.connect(
                             this@await.name,
                             callable,
-                            Object.ConnectFlags.CONNECT_REFERENCE_COUNTED.id,
+                            Object.ConnectFlags.REFERENCE_COUNTED.id,
                         )
                         debugLog { "Connected signal ${this@await.name} to callable: ${callable.getObject()}::${callable.getMethod()}" }
                     }

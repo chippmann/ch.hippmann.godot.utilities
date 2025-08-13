@@ -24,7 +24,7 @@ class SignalConnectorSample : Node(), SignalConnectable by SignalConnector() {
         ready.connect {
             GD.print("${SignalConnectorSample::class.simpleName} is ready")
         }
-        customSignalWithArgs.connect(Object.ConnectFlags.CONNECT_ONE_SHOT.id) { arg ->
+        customSignalWithArgs.connect(Object.ConnectFlags.ONE_SHOT.id) { arg ->
             GD.print("Received signal emition from ${::customSignalWithArgs.name} with arg: $arg. This signal should only be received once!")
         }
     }

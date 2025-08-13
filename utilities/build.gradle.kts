@@ -23,6 +23,12 @@ dependencies {
 
 kotlin {
     jvmToolchain(libs.versions.jvmToolchainVersion.get().toInt())
+
+    compilerOptions {
+        optIn.apply {
+            add("kotlin.time.ExperimentalTime")
+        }
+    }
 }
 
 val projectName = name
